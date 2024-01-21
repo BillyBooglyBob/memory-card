@@ -1,0 +1,30 @@
+.selected, h2 {
+    cursor: pointer;
+}
+
+.selected {
+    padding: 10px;
+}
+
+.selected input[type="radio"] {
+    /* Hide the default radio button */
+    display: none;
+}
+
+.selected input[type="radio"] + span::before {
+    opacity: 0;
+    content: '\25B6'; /* Unicode character for a bullet point or use an image */
+    margin-right: 8px;
+}
+
+/* animation for the radio button only*/
+.selected input[type="radio"]:checked + span::before {
+    animation: 1.5s flash infinite;
+}
+
+@keyframes flash {
+    50%{
+        opacity: 1;
+    }
+}
+

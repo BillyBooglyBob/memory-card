@@ -1,0 +1,132 @@
+App.jsx
+- states
+    - screenDisplayed
+        - always display the same background
+        - depending on this, display either home or game screen
+    - difficulty
+- display
+    {screenDisplayed === "home" ? 
+    <HomeScreen onDifficultyChange{handleDifficulty} /> 
+    : <GameScreen difficulty={difficulty} />}
+- functions
+    - handleDifficulty(difficulty) {
+        setDifficulty(difficulty);
+    }
+
+HomeScreen.jsx
+- props
+    - setScreenDisplayed
+    - onDifficultyChange
+- display
+    - title, logo
+    - difficulty selection panel
+        - change difficulty state between Easy, Medium and Hard
+        - three divs with 3 values
+        - onChange={handleDifficulty} (perhaps make function inline???)
+    - start game panel
+        - change the screen state to "game"
+        - onClick(handleScreenChange)
+- functions
+    - handleDifficulty(e) {
+        onDifficultyChange(e.target.value);
+    }
+    - handleScreenChange() {
+        setScreenDisplayed("game")
+    }
+
+GameScreen.jsx
+- props
+    - setScreenDisplayed
+    - difficulty
+- states
+    - highScore
+    - cards
+    - playedCardIds
+    - gameStatus (playing, win or lose)
+    - score (get from playedCardIds.length)
+- display
+    - home button
+        - onClick(() => setScreenDisplayed("home"))
+    - score and high score banner at the top
+    - cards displayed across the whole screen
+        - 6 cards per row
+        - <Card handlePlay={play}/>
+- logic
+    - when deciding element to return
+        - if gameStatus === lose
+            - return ResultScreen(status="lose")
+        - if gameStatus === win
+            - return ResultScreen(status="win")
+        - if gameStatus === playing
+            - return cards
+                - when card hovered, do slight rotate
+                - when clicked, if playedCardIds.contain(card)
+                    - set gameStatus to lose
+                - else, if score === cards.length
+                    - set gameStatus to win
+- functions
+    - initiateCards()
+        - uses difficulty of GameScreen
+            - Easy: 5
+            - Medium: 10
+            - Hard: 20
+        - setCards()
+            - API request for random # of pokemons according to difficulty
+    - reset()
+        - resetplayedCardIds() {
+            setplayedCardIds([]);
+        }
+        - resetGameStatus() {
+            setGameStatus("playing");
+        }
+        - resetplayedCardIds();
+        - resetGameStatus();
+    - playCard(id) {
+        if (playedCardIds.contain(id)) {
+            setGameStatus("lose");
+            return;
+        }
+
+        playedCardIds.push(id);
+        if (playedCardIds.length === cards.length) {
+            setGameStatus("win");
+            return;
+        }
+    }
+    - checkHighScore() {
+        if (playedCardIds.length > highScore) {
+            setHighScore(playedCardIds.length);
+        }
+    }
+    - play(id) {
+        playCard(id);
+        checkHighScore();
+    }
+
+Card
+- props
+    - handlePlay
+- state
+    - id
+- display  
+    - create div 
+        - onClick(handlePlay(id))
+    - pokemon image
+    - name
+    - flip image
+
+ResultScreen
+- props
+    - setScreenDisplayed
+    - status
+    - reset
+- display
+    - message
+    - gif
+    - play again
+        - reset
+        - setScreenDisplayed = "game"
+        - initiateCards()
+    - quit
+        - setScreenDisplayed = "home"
+

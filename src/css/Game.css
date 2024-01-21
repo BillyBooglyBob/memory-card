@@ -1,0 +1,12 @@
+.cards {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.home-button {
+    cursor: pointer;
+}
+
+.home-button img {
+    max-width: 30px;
+}

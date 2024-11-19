@@ -2,18 +2,19 @@ import { useState, useEffect, useRef } from "react";
 import { v4 as uuid } from "uuid";
 import "../css/Game.css";
 import IMAGES from "../assets/images/Images";
+import { motion } from "framer-motion";
 
-export default function Game({ changeScreen, difficulty }) {
-    const [cards, setCards] = useState([]); // All cards
-    const [selectedCardIds, setSelectedCardIds] = useState([]); // Cards that have been selected already before
-    const [gameStatus, setGameStatus] = useState("selecting"); // Game status, can be selecting, win or lose
+export default function Game({ changeScreen, difficulty, changeDifficulty }) {
+    const [cards, setCards] = useState([]);
+    const [selectedCardIds, setSelectedCardIds] = useState([]);
+    const [gameStatus, setGameStatus] = useState("selecting");
     const [highScore, setHighScore] = useState(0);
     const [score, setScore] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [flipped, setFlipped] = useState(false); // New state for flipping animation
 
-    // Fetch the pokemon data and initiate the cards
     const initiateCards = () => {
-        // Randomly select pokemons based on the difficulty level
+        // Randomly select pokemons
         const randomSelect = (pokemonsArray) => {
             const getRandomItems = (array, count) => {
                 const shuffledArray = array.sort(() => Math.random() - 0.5);
@@ -21,46 +22,34 @@ export default function Game({ changeScreen, difficulty }) {
             };
 
             let pokemonCount = 0;
-            if (difficulty === "easy") {
-                pokemonCount = 5;
-            } else if (difficulty === "medium") {
-                pokemonCount = 10;
-            } else if (difficulty === "hard") {
-                pokemonCount = 20;
-            }
+            if (difficulty === "easy") pokemonCount = 5;
+            else if (difficulty === "medium") pokemonCount = 10;
+            else if (difficulty === "hard") pokemonCount = 20;
 
             return getRandomItems(pokemonsArray, pokemonCount);
         };
 
+        // Fetch pokemons from API
         const fetchPokemons = async () => {
-            // Turn on loading
             setLoading(true);
-
-            // Fetch pokemons from the API
             const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=300");
             const data = await response.json();
             const result = await data.results;
 
-            // Randomly select number of them based on the difficulty level
             const selectPokemons = randomSelect(result);
 
-            // For each pokemon, fetch their data, initiate the card and add
-            // it to the cards array
             const pokemonPromises = selectPokemons.map(async (pokemon) => {
                 const response = await fetch(pokemon.url);
                 const data = await response.json();
-                const image = await data.sprites.versions["generation-v"]["black-white"]
-                    .front_default;
-                const name = await data.name;
+                const image = data.sprites.versions["generation-v"]["black-white"].front_default;
 
                 return {
                     id: uuid(),
-                    name: name,
-                    image: image,
+                    name: data.name,
+                    image,
                 };
             });
 
-            // Wait for all the pokemon data to be fetched before turning off loading
             const pokemons = await Promise.all(pokemonPromises);
             setCards(pokemons);
             setLoading(false);
@@ -68,10 +57,9 @@ export default function Game({ changeScreen, difficulty }) {
         fetchPokemons();
     };
 
-    // used to prevent useEffect hook being called twice in development due to strict mode
+    // When the component mounts, initiate the cards
     const initialised = useRef(false);
 
-    // Initialise the cards
     useEffect(() => {
         if (!initialised.current) {
             initialised.current = true;
@@ -79,93 +67,99 @@ export default function Game({ changeScreen, difficulty }) {
         }
     }, []);
 
-    // Select a card and check if it is selected. If selected, set the game
-    // status to lose, if not, update the score and check if the game is won
-    const selectCard = (id) => {
-        if (selectedCardIds.includes(id)) {
-            setGameStatus("lose");
-        }
-
-        setSelectedCardIds([...selectedCardIds, id]);
-        updateScore();
-
-        let newSelectedCardIdsLength = selectedCardIds.length + 1;
-
-        if (cards.length === newSelectedCardIdsLength) {
-            setGameStatus("win");
-        }
-    };
-
-    // Update the score
-    const updateScore = () => {
-        const newScore = score + 1;
-        setScore(newScore);
-
-        // update the high score as well
-        if (newScore > highScore) {
-            setHighScore(newScore);
-        }
-    };
-
-    // Shuffle the existing cards
+    // Shuffle the cards
     const shuffle = () => {
-        let array = cards;
+        const array = [...cards];
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [array[i], array[j]] = [array[j], array[i]];
         }
-
         setCards(array);
     };
 
-    // Select a card and shuffle the cards
-    const select = (id) => {
-        selectCard(id);
-        shuffle();
+    // Check if selected card is in the selectedCardIds array
+    const selectCard = (id) => {
+        if (selectedCardIds.includes(id)) setGameStatus("lose");
+
+        setSelectedCardIds([...selectedCardIds, id]);
+        updateScore();
+
+        if (selectedCardIds.length + 1 === cards.length) setGameStatus("win");
     };
 
-    // Play current game again
+    // When card selected, check for win. If loss or win, end the game.
+    // Else, shuffle
+    const select = (id) => {
+        selectCard(id); // Process selected card
+
+        // Shuffle is resetting the flips
+
+        if (!flipped) {
+            setFlipped(true); // Start flipping animation
+            setTimeout(() => {
+                shuffle(); // Shuffle after animation
+            }, 500); // Duration of flip animation
+            setTimeout(() => {
+                setFlipped(false); // End flipping animation
+            }, 1000); // Duration of flip animation
+        }
+    };
+
+    // Update user score
+    const updateScore = () => {
+        const newScore = score + 1;
+        setScore(newScore);
+        if (newScore > highScore) setHighScore(newScore);
+    };
+
+    // Play again
     const playAgain = () => {
-        const reset = () => {
-            setScore(0);
-            setCards([]);
-            setSelectedCardIds([]);
-        };
         initiateCards();
-        reset();
+        setScore(0);
+        setSelectedCardIds([]);
+        changeDifficulty("easy");
         setGameStatus("selecting");
     };
 
-    // Quit current game and go back to home screen
     const quit = () => {
+        changeDifficulty("easy");
         changeScreen("home");
     };
 
     if (loading) {
-        return <div class="poke-ball"></div>;
+        return <div className="poke-ball"></div>;
     }
 
     return (
         <>
             {gameStatus === "selecting" ? (
                 <>
-                    <div className="home-button" onClick={() => changeScreen("home")}>
-                        <img src={IMAGES.logo} />
-                        <h1>PocketMon Pair-Up: Gotta Match 'Em All!</h1>
+                    <div className="home-button" onClick={quit}>
+                        <div>
+                            <img src={IMAGES.logo} />
+                            <h1>PocketMon Pair-Up: Gotta Match 'Em All!</h1>
+                        </div>
                     </div>
+
                     <div className="score-board">
                         <h2>High Score: {highScore}</h2>
                         <h2>Score: {score}</h2>
                     </div>
                     <div className="cards">
-                        {cards.map((card) => {
-                            return (
-                                <div key={card.id} onClick={() => select(card.id)}>
-                                    <img src={card.image} alt={card.name} />
-                                    <h1>{card.name}</h1>
+                        {cards.map((card) => (
+                            // Card will flip from back to front
+                            <div key={card.id} onClick={() => select(card.id)} className="card">
+                                <div className={flipped ? "flipped" : ""}>
+                                    <div className="front">
+                                        <img src={card.image} alt={card.name} />
+                                        <h1>{card.name}</h1>
+                                    </div>
+                                    <div className="back">
+                                        <img src={IMAGES.pokemonCard} alt="card back" />
+                                    </div>
                                 </div>
-                            );
-                        })}
+                            </div>
+                        ))}
                     </div>
                 </>
             ) : gameStatus === "lose" ? (

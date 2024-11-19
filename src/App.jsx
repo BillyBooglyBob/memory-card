@@ -20,7 +20,7 @@ function App() {
             {screenDisplay === "home" ? (
                 <Home changeScreen={handleScreenDisplay} changeDifficulty={handleDifficulty} />
             ) : (
-                <Game changeScreen={handleScreenDisplay} difficulty={difficulty}/>
+                <Game changeScreen={handleScreenDisplay} difficulty={difficulty} changeDifficulty={handleDifficulty}/>
             )}
         </div>
     );

@@ -93,15 +93,24 @@ export default function Game({ changeScreen, difficulty, changeDifficulty }) {
         selectCard(id); // Process selected card
 
         // Shuffle is resetting the flips
-
         if (!flipped) {
             setFlipped(true); // Start flipping animation
+
+            // Set two different timeouts as there is a delay between shuffle
+            // and updating the cards array. If shuffle is at the same time as
+            // flipping the cards back, some cards will not have the animation.
+
+            // Shuffle the cards first
             setTimeout(() => {
-                shuffle(); // Shuffle after animation
-            }, 500); // Duration of flip animation
+                shuffle();
+            }, 500);
+
+            // Wait for 0.5s to make sure the shuffled cards have updated the
+            // cards array before flipping the cards, else shuffle might
+            // have conflict and some cards will not have the animation
             setTimeout(() => {
-                setFlipped(false); // End flipping animation
-            }, 1000); // Duration of flip animation
+                setFlipped(false);
+            }, 1000);
         }
     };
 
@@ -114,13 +123,13 @@ export default function Game({ changeScreen, difficulty, changeDifficulty }) {
 
     // Play again
     const playAgain = () => {
-        initiateCards();
-        setScore(0);
-        setSelectedCardIds([]);
-        changeDifficulty("easy");
+        initiateCards(); // Get new set of cards
+        setScore(0); // Reset score
+        setSelectedCardIds([]); // Reset selected cards
         setGameStatus("selecting");
     };
 
+    // Quit the game and reset difficulty
     const quit = () => {
         changeDifficulty("easy");
         changeScreen("home");
@@ -147,7 +156,10 @@ export default function Game({ changeScreen, difficulty, changeDifficulty }) {
                     </div>
                     <div className="cards">
                         {cards.map((card) => (
-                            // Card will flip from back to front
+                            // Two divs overlayed on top of each other. One for front and one for back
+                            // Initially, front is displayed. When flipped is applied, will rotate
+                            // to show the back. After removing flipped, it will rotate back
+                            // to the front
                             <div key={card.id} onClick={() => select(card.id)} className="card">
                                 <div className={flipped ? "flipped" : ""}>
                                     <div className="front">

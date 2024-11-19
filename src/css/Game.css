@@ -2,6 +2,7 @@
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 3rem;
+    padding: 4rem
 }
 
 .card {
@@ -11,13 +12,27 @@
     transform-style: preserve-3d;
 }
 
+/* Front of card */
+/* Initially visible, when flipped is not visible */
+.card .front {
+    height: 15rem;
+    width: 10rem;
+    position: absolute; /* To make sure the front and back are on top of each other */
+    transition: all ease-in 0.2s; /* Takes 0.2sec for the flip to happen */
+}
+
+.flipped .front {
+    transform: rotateY(90deg);
+}
+
 /* Back of card */
 /* Initially not visible, when flipped is visible */
 .card .back {
-    transform: rotateY(90deg);
+    transform: rotateY(90deg); /* Initially not visible */
     height: 15rem; /* Fixed height for cards */
     width: 10rem; /* Fixed width for cards to make them uniform */
-    transition: all ease-in 0.2s
+    transition: all ease-in 0.2s; /* Takes 0.2sec for the flip to happen */
+    transition-delay: 0.2s; /* Delay to make it seem as if the card is being shuffled */
 }
 
 .card .back img {
@@ -25,24 +40,10 @@
     width: 10rem; /* Fixed width for cards to make them uniform */
 }
 
+/* When flipped, show the card. */
 .flipped .back {
     transform: rotateY(0deg);
     transition-delay: 0.2s;
-}
-
-/* Front of card */
-/* Initially visible, when flipped is not visible */
-.card .front {
-    height: 15rem;
-    width: 10rem;
-    position: absolute;
-    transition: all ease-in 0.2s;
-    transition-delay: 0.2s;
-}
-
-.flipped .front {
-    transform: rotateY(90deg);
-    transition-delay: 0s;
 }
 
 .home-button {

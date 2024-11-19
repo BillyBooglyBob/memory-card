@@ -8,6 +8,7 @@ export default function Home({ changeScreen, changeDifficulty }) {
         setSelectedItem(value);
         changeDifficulty(value);
     };
+
     return (
         <>
             <h1>PocketMon Pair-Up: Gotta Match 'Em All!</h1>

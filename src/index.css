@@ -1,27 +1,28 @@
 @font-face {
-  font-family: 'PixelFont';
-  src: url(./assets/font/Minecraft.ttf) format('truetype');
+    font-family: "PixelFont";
+    src: url(./assets/font/Minecraft.ttf) format("truetype");
 }
 
 :root {
-  color: white;
-  font-family: 'PixelFont';
-  line-height: 1.5;
-  font-weight: 400;
+    color: white;
+    font-family: "PixelFont";
+    line-height: 1.5;
+    font-weight: 400;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-  background-image: url(./assets/images/background.jpg);
-  background-size: cover;
-  background-repeat: no-repeat;
+    margin: 0;
+    display: flex;
+    place-items: center;
+    min-width: 320px;
+    min-height: 100vh;
+    background-image: url(./assets/images/background.jpg);
+    background-size: 100% 100%; /* Ensures the image stretches to cover the entire container without maintaining aspect ratio */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    background-attachment: fixed; /*Keeps the image fixed in place, even when scrolling*/
 }

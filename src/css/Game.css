@@ -10,3 +10,23 @@
 .home-button img {
     max-width: 30px;
 }
+
+.poke-ball {
+    width: 10rem;
+    height: auto;
+    aspect-ratio: 1;
+    background-image: url(../assets//images/pokeball.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    animation: spin 1s linear infinite
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
